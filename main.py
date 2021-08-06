@@ -68,8 +68,15 @@ def get_decimal_input(prompt, min, max, allow_blank=False):
 
 
 def print_abiturients(abiturients):
+    print(abiturients)
     headers = ["МЕСТО", "БАЛЛЫ", "ОСНОВАНИЕ ПРИЕМА", "СОГЛАСИЕ"]
-    table = [abit.values() for abit in abiturients] 
+    table = []
+    for abit in abiturients:
+        position = abit["position"]
+        result = abit["exam_result"]
+        basis = abit.get("basis", 'Б')
+        agreement = abit.get("agreement", "Нет")
+        table.append([position, result, basis, agreement])
     print(tabulate(table, headers, tablefmt="fancy_grid"))
 
 
@@ -84,10 +91,14 @@ def analyze_abiturients(abiturients, cur_position):
             print(f"\tБез согласия: {agreements_no}")
             print(f"\tС согласием на другое направление: {agreements_other}")
         agreement = abit.get("agreement", "нет").lower()
+        basis = abit.get("basis")
         if agreement == "да":
             agreements_yes += 1
         elif agreement == "нет":
-            agreements_no += 1
+            if basis:
+                agreements_other += 1
+            else:
+                agreements_no += 1
         else:
             agreements_other += 1
     print()
@@ -126,13 +137,13 @@ universities = [
                 "name": "Информатика и вычислительная техника",
                 "url": "https://abit.nntu.ru/info/bak/konkurs/?learn_form_id=0&fac_id=281474976714124&specialization=&spec_id=281474976710932&commerce=1",
                 "column_names": {1: "position", 3: "exam_result", 6: "basis", 7: "agreement"},
-                "budget_places": 93
+                "budget_places": 81
             },
             {
                 "name": "Информационные системы и технологии",
                 "url": "https://abit.nntu.ru/info/bak/konkurs/?learn_form_id=0&fac_id=281474976714124&specialization=&spec_id=281474976710935&commerce=1",
                 "column_names": {1: "position", 3: "exam_result", 6: "basis", 7: "agreement"},
-                "budget_places": 125
+                "budget_places": 105
             }
         ]
     }
