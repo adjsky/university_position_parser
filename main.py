@@ -1,5 +1,6 @@
 import requests
 import math
+from tabulate import tabulate
 from html.parser import HTMLParser
 
 
@@ -55,9 +56,11 @@ class RatingParser(HTMLParser):
         return self.abiturients[:]
 
 
-def get_decimal_input(prompt, min, max):
+def get_decimal_input(prompt, min, max, allow_blank=False):
     while True:
         value = input(prompt)
+        if not value and allow_blank:
+            return None
         if value.isdecimal():
             value = int(value)
             if min <= value <= max:
@@ -65,13 +68,9 @@ def get_decimal_input(prompt, min, max):
 
 
 def print_abiturients(abiturients):
-    print("Список абитуриентов:")
-    for abit in abiturients:
-        position = abit["position"]
-        result = abit["exam_result"]
-        agreement = abit.get("agreement", "Нет")
-        basis = abit.get("basis", "Бюджет")
-        print(f"{position}. ЕГЭ: {result} СОГЛАСИЕ: {agreement}, ОСНОВАНИЕ ПРИЕМА: {basis}")
+    headers = ["МЕСТО", "БАЛЛЫ", "ОСНОВАНИЕ ПРИЕМА", "СОГЛАСИЕ"]
+    table = [abit.values() for abit in abiturients] 
+    print(tabulate(table, headers, tablefmt="fancy_grid"))
 
 
 def analyze_abiturients(abiturients, cur_position):
@@ -173,8 +172,10 @@ if __name__ == "__main__":
     print()
     action_id = get_decimal_input("Выберите одно из перечисленных выше действий (по номеру): ", 1, len(actions))
     action_id -= 1
-    if action_id == 1:
-        print()
+    print()
+    if action_id == 0:
+        abiturients_amount = get_decimal_input("Какое количество абитуриентов вывести (нажмите Enter, чтобы вывести всех): ", 0, math.inf, True)
+    elif action_id == 1:
         my_position = get_decimal_input("Введите ваше текущее место в списках: ", 1, math.inf)
     print('-' * 50)
     print(f"Бюджетных мест: {faculties[faculty_id]['budget_places']}")
@@ -185,7 +186,9 @@ if __name__ == "__main__":
     parser.feed(r.text)
 
     action_func = actions[action_id]["func"]
+    abiturients = parser.get_abiturients()
     if action_id == 0:
-        action_func(parser.get_abiturients())
+        print()
+        action_func(abiturients if abiturients_amount is None else abiturients[:abiturients_amount])
     elif action_id == 1:
-        action_func(parser.get_abiturients(), my_position)
+        action_func(abiturients, my_position)
