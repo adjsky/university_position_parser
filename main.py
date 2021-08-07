@@ -68,7 +68,6 @@ def get_decimal_input(prompt, min, max, allow_blank=False):
 
 
 def print_abiturients(abiturients):
-    print(abiturients)
     headers = ["МЕСТО", "БАЛЛЫ", "ОСНОВАНИЕ ПРИЕМА", "СОГЛАСИЕ"]
     table = []
     for abit in abiturients:
